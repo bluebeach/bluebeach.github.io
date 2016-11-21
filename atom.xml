@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-11-20T17:32:29.000Z</updated>
+  <updated>2016-11-21T18:55:56.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,138 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>【全栈之路】Node.js爬虫（一）</title>
+    <link href="http://yoursite.com/2016/11/22/%E3%80%90%E5%85%A8%E6%A0%88%E4%B9%8B%E8%B7%AF%E3%80%91Node-js%E7%88%AC%E8%99%AB%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+    <id>http://yoursite.com/2016/11/22/【全栈之路】Node-js爬虫（一）/</id>
+    <published>2016-11-21T18:01:08.000Z</published>
+    <updated>2016-11-21T18:55:56.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="使用nodejs爬取知乎的内容，然后在web中显示出来"><a href="#使用nodejs爬取知乎的内容，然后在web中显示出来" class="headerlink" title="使用nodejs爬取知乎的内容，然后在web中显示出来"></a>使用nodejs爬取知乎的内容，然后在web中显示出来</h3><blockquote>
+<p><a href="https://www.zhihu.com/explore#daily-hot" target="_blank" rel="external">知乎发现URL</a></p>
+<p>统计今日最热的问题和回答</p>
+</blockquote>
+<ul>
+<li>使用request发起http请求</li>
+<li>使用了cheerio解析html</li>
+<li>使用了mysql保存抓取的数据</li>
+<li>使用了express作web展示</li>
+</ul>
+<hr>
+<ul>
+<li><p>字段包括</p>
+<ul>
+<li>问题title</li>
+<li>热门回答url</li>
+<li>回答者姓名</li>
+<li>点赞数</li>
+<li>回答者badge</li>
+<li>回答者title</li>
+<li>回答内容摘要</li>
+<li>评论数</li>
+</ul>
+</li>
+<li><p>设计</p>
+<ul>
+<li>fetcher.js: 负责下载网页</li>
+<li>parser.js: 解析html返回需要保存的数据</li>
+<li>zhihuDao.js: 数据表的操作</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="1-下载网页"><a href="#1-下载网页" class="headerlink" title="1. 下载网页"></a>1. 下载网页</h4><p><a href="#1">fetcher.js</a></p>
+<a id="more"></a>
+<p>使用request库，很简单</p>
+<h4 id="2-解析网页"><a href="#2-解析网页" class="headerlink" title="2. 解析网页"></a>2. 解析网页</h4><p><a href="#2">parser.js</a></p>
+<p>打开<a href="https://www.zhihu.com/explore#daily-hot" target="_blank" rel="external">知乎的发现页面</a>，使用Chrome开发者工具仔细研究想要获取的数据对应的html元素在哪里。</p>
+<p><img src="/images/2.png" alt="2.png"></p>
+<p>发现每一个热门的item都对应着一个class=”explore-feed feed-item”的div，Good！</p>
+<p>首先挑选出所有的item</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$(<span class="string">'.explore-feed.feed-item'</span>).each</div></pre></td></tr></table></figure>
+<p><a href="http://www.w3school.com.cn/jquery/traversing_each.asp" target="_blank" rel="external">jQuery遍历each()方法</a></p>
+<ul>
+<li>再根据<a href="http://www.w3school.com.cn/jquery/jquery_ref_selectors.asp" target="_blank" rel="external">jQuery选择器语法</a>，基本可以选择出想要的元素<ul>
+<li>${a.question_link}: 获取class为question_link的a标签</li>
+<li>$(‘.explore-feed.feed-item’): 获取class具有explore-feed且feed-item的元素</li>
+<li>$(‘ul’).attr(‘id’): 获取属性</li>
+<li>$(‘.badge-summary &gt; a’).text(): 获取class为badge-summary的span标签下的a标签文本</li>
+<li>item(‘.summary-wrapper &gt; [title]’): 获取class为summary-wrapper下带有title属性的元素</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-保存数据"><a href="#3-保存数据" class="headerlink" title="3. 保存数据"></a>3. 保存数据</h4><p><a href="#3">zhihuDAO.js</a></p>
+<p>nodejs连接mysql</p>
+<p>新建mysql表zhihu_explore用来存储爬取的数据(以后换成mongodb试试(づ｡◕‿‿◕｡)づ)</p>
+<p><img src="/images/3.png" alt="3.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">insert: </div><div class="line">connection.query(sql, paramArray, function(err, result)&#123;&#125;)</div></pre></td></tr></table></figure>
+<ul>
+<li>什么时候需要关闭connection连接？<ul>
+<li>在zhihuDAO.js中<code>exports.close</code>导出关闭mysql连接函数</li>
+<li>在parser.js中新增一个回调函数用来关闭mysql连接</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-抓取数据保存到数据库中"><a href="#4-抓取数据保存到数据库中" class="headerlink" title="4. 抓取数据保存到数据库中"></a>4. 抓取数据保存到数据库中</h4><p><a href="#4">main.js</a></p>
+<p><img src="/images/4.png" alt="4.png"></p>
+<h4 id="5-启动express展示数据"><a href="#5-启动express展示数据" class="headerlink" title="5. 启动express展示数据"></a>5. 启动express展示数据</h4><p><img src="/images/1.png" alt="1.png"></p>
+<hr>
+<h4 id="附源码"><a href="#附源码" class="headerlink" title="附源码"></a>附源码</h4><p><a name="1"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// fetcher.js</span></div><div class="line"><span class="keyword">var</span> request = <span class="built_in">require</span>(<span class="string">'request'</span>)</div><div class="line"><span class="keyword">var</span> zhihuDAO = <span class="built_in">require</span>(<span class="string">'../scrapy/zhihuDAO'</span>)</div><div class="line"></div><div class="line">exports.fetch = <span class="function"><span class="keyword">function</span> (<span class="params">url, callback</span>) </span>&#123;</div><div class="line">    request(url, <span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>) </span>&#123;</div><div class="line">        <span class="keyword">if</span> (!error &amp;&amp; response.statusCode == <span class="number">200</span>) &#123;</div><div class="line">            callback(body, zhihuDAO.insert, zhihuDAO.close)</div><div class="line">        &#125;</div><div class="line">    &#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></a></p>
+<p></p>
+<p><a name="2"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// parser.js</span></div><div class="line"><span class="keyword">var</span> cheerio = <span class="built_in">require</span>(<span class="string">'cheerio'</span>);</div><div class="line"></div><div class="line">exports.parse = <span class="function"><span class="keyword">function</span> (<span class="params">html, callback, final</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> $ = cheerio.load(html);</div><div class="line">    $(<span class="string">'.explore-feed.feed-item'</span>).each(<span class="function"><span class="keyword">function</span> (<span class="params">index, element</span>) </span>&#123;</div><div class="line">        <span class="keyword">var</span> item = cheerio.load(element);</div><div class="line">        <span class="keyword">var</span> question_title = item(<span class="string">'a.question_link'</span>).text();</div><div class="line">        <span class="keyword">var</span> question_url = item(<span class="string">'a.question_link'</span>).attr(<span class="string">'href'</span>);</div><div class="line">        <span class="keyword">var</span> answer_name = item(<span class="string">'.author-link'</span>).text();</div><div class="line">        <span class="keyword">var</span> support_count = item(<span class="string">'.zm-item-vote-count.js-expand.js-vote-count'</span>).text();</div><div class="line">        <span class="keyword">var</span> answer_badge = item(<span class="string">'.badge-summary &gt; a'</span>).text();</div><div class="line">        <span class="keyword">var</span> answer_title = item(<span class="string">'.summary-wrapper &gt; [title]'</span>).attr(<span class="string">'title'</span>);</div><div class="line">        <span class="keyword">var</span> answer_content_summary = item(<span class="string">'.zh-summary.summary.clearfix'</span>).text();</div><div class="line">        <span class="keyword">var</span> answer_content_pic = item(<span class="string">'.zh-summary.summary.clearfix &gt; img'</span>).attr(<span class="string">'src'</span>);</div><div class="line">        answer_content_pic = answer_content_pic===<span class="literal">undefined</span>?<span class="string">''</span>:answer_content_pic;</div><div class="line">        <span class="keyword">var</span> comment_count = item(<span class="string">'.meta-item.toggle-comment.js-toggleCommentBox'</span>).text();</div><div class="line"></div><div class="line">        <span class="keyword">var</span> param = [removeN(question_title),</div><div class="line">            removeN(question_url),</div><div class="line">            removeN(answer_name),</div><div class="line">            removeN(support_count),</div><div class="line">            removeN(answer_badge),</div><div class="line">            removeN(answer_title),</div><div class="line">            removeN(answer_content_pic)+<span class="string">' '</span>+removeN(answer_content_summary),</div><div class="line">            removeN(comment_count)];</div><div class="line">        callback(param)</div><div class="line"></div><div class="line">    &#125;);</div><div class="line">    final()</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">removeN</span>(<span class="params">str</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> res = <span class="string">''</span>;</div><div class="line">    <span class="keyword">if</span> (str) &#123;</div><div class="line">        res= str.replace(<span class="regexp">/\\n/g</span>, <span class="string">''</span>);</div><div class="line">    &#125;<span class="keyword">else</span> &#123;</div><div class="line">        res = str;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> res;</div><div class="line">&#125;</div></pre></td></tr></table></figure></a></p>
+<p></p>
+<p><a name="3"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// zhihuDAO.js</span></div><div class="line"><span class="keyword">var</span> mysql = <span class="built_in">require</span>(<span class="string">'mysql'</span>)</div><div class="line"></div><div class="line"><span class="keyword">var</span> connection = mysql.createConnection(&#123;</div><div class="line">    <span class="attr">host</span>:<span class="string">'xxx'</span>,</div><div class="line">    <span class="attr">user</span>:<span class="string">'xxx'</span>,</div><div class="line">    <span class="attr">password</span>:<span class="string">'xxx'</span>,</div><div class="line">    <span class="attr">database</span>:<span class="string">'xxx'</span></div><div class="line">&#125;);</div><div class="line">connection.connect();</div><div class="line"></div><div class="line">exports.insert = <span class="function"><span class="keyword">function</span> (<span class="params">param</span>) </span>&#123;</div><div class="line"></div><div class="line">    connection.query(<span class="string">'insert into zhihu_explore(qustion_title, answer_url, answer_name, support_count, answer_badge, answer_title, answer_content_summary, comment_count) values (?,?,?,?,?,?,?,?)'</span>, param, <span class="function"><span class="keyword">function</span>(<span class="params">err, result</span>) </span>&#123;</div><div class="line">        <span class="keyword">if</span> (err) &#123;</div><div class="line">            <span class="built_in">console</span>.log(<span class="string">'insert error - '</span>, err.message)</div><div class="line">            <span class="keyword">return</span> ;</div><div class="line">        &#125;</div><div class="line">    &#125;)</div><div class="line">&#125;</div><div class="line"></div><div class="line">exports.close = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    connection.end()</div><div class="line">&#125;</div></pre></td></tr></table></figure></a></p>
+<p></p>
+<p><a name="4"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// main.js</span></div><div class="line"><span class="keyword">var</span> fetcher = <span class="built_in">require</span>(<span class="string">'../scrapy/fetcher'</span>);</div><div class="line"><span class="keyword">var</span> parser = <span class="built_in">require</span>(<span class="string">'../scrapy/parser'</span>);</div><div class="line">fetcher.fetch(<span class="string">'https://www.zhihu.com/explore'</span>, parser.parse);</div><div class="line"></div><div class="line"><span class="comment">// node main.js</span></div></pre></td></tr></table></figure></a></p>
+<p></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;使用nodejs爬取知乎的内容，然后在web中显示出来&quot;&gt;&lt;a href=&quot;#使用nodejs爬取知乎的内容，然后在web中显示出来&quot; class=&quot;headerlink&quot; title=&quot;使用nodejs爬取知乎的内容，然后在web中显示出来&quot;&gt;&lt;/a&gt;使用nodejs爬取知乎的内容，然后在web中显示出来&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.zhihu.com/explore#daily-hot&quot;&gt;知乎发现URL&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;统计今日最热的问题和回答&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;使用request发起http请求&lt;/li&gt;
+&lt;li&gt;使用了cheerio解析html&lt;/li&gt;
+&lt;li&gt;使用了mysql保存抓取的数据&lt;/li&gt;
+&lt;li&gt;使用了express作web展示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;字段包括&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;问题title&lt;/li&gt;
+&lt;li&gt;热门回答url&lt;/li&gt;
+&lt;li&gt;回答者姓名&lt;/li&gt;
+&lt;li&gt;点赞数&lt;/li&gt;
+&lt;li&gt;回答者badge&lt;/li&gt;
+&lt;li&gt;回答者title&lt;/li&gt;
+&lt;li&gt;回答内容摘要&lt;/li&gt;
+&lt;li&gt;评论数&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;设计&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;fetcher.js: 负责下载网页&lt;/li&gt;
+&lt;li&gt;parser.js: 解析html返回需要保存的数据&lt;/li&gt;
+&lt;li&gt;zhihuDao.js: 数据表的操作&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h4 id=&quot;1-下载网页&quot;&gt;&lt;a href=&quot;#1-下载网页&quot; class=&quot;headerlink&quot; title=&quot;1. 下载网页&quot;&gt;&lt;/a&gt;1. 下载网页&lt;/h4&gt;&lt;p&gt;&lt;a href=&quot;#1&quot;&gt;fetcher.js&lt;/a&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="全栈之路" scheme="http://yoursite.com/categories/%E5%85%A8%E6%A0%88%E4%B9%8B%E8%B7%AF/"/>
+    
+    
+      <category term="Node.js" scheme="http://yoursite.com/tags/Node-js/"/>
+    
+  </entry>
   
   <entry>
     <title>【全栈之路】基础（一）</title>
