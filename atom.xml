@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-11-21T19:05:54.000Z</updated>
+  <updated>2017-06-04T13:16:31.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,11 +16,56 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>运维管理平台——Ateye.md</title>
+    <link href="http://yoursite.com/2017/06/04/Ateye%E4%BB%8B%E7%BB%8D-md/"/>
+    <id>http://yoursite.com/2017/06/04/Ateye介绍-md/</id>
+    <published>2017-06-04T13:13:41.000Z</published>
+    <updated>2017-06-04T13:16:31.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Ateye系统是通用的应用运维平台，其具有应用程序行为控制和基于日志的系统监控两大类功能。使用方通过引入Ateye的client包并进行简单设置。</p>
+<h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><ul>
+<li>方法调用（重点）</li>
+<li>动态开关（重点）</li>
+<li>日志级别调整</li>
+<li>异常监控</li>
+<li>KV埋点</li>
+</ul>
+<a id="more"></a>
+<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><p>在 web.xml 里配置一个 Servlet</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;servlet&gt;  </div><div class="line">        &lt;servlet-name&gt;ateye&lt;/servlet-name&gt;   </div><div class="line">     	&lt;servlet-class&gt;com.taobao.ateye.servlet.AteyeServlet&lt;/servlet-class&gt;   </div><div class="line">        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;   </div><div class="line">&lt;/servlet&gt;  </div><div class="line"></div><div class="line">&lt;servlet-mapping&gt;  </div><div class="line">        &lt;servlet-name&gt;ateye&lt;/servlet-name&gt;   </div><div class="line">        &lt;url-pattern&gt;/agent.ateye&lt;/url-pattern&gt;   </div><div class="line">&lt;/servlet-mapping&gt;</div></pre></td></tr></table></figure>
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>ateye-server 通过和 ateye-client 发送http请求进行通信。</p>
+<p>ateye-server 负责界面操作，以及一些持久化数据，用户操作记录，应用机器注册的职责。</p>
+<p>ateye-client 负责控制应用里的操作，包括通过反射调用方法，改变属性值。</p>
+<p>ateye-clinet启动的时候扫描所有Spring注册的bean，通过反射拿到带有注解的方法和字段。ateye-client监听 /agent.ateye 的请求，然后反射调用方法 或者 直接设置属性值。</p>
+<h2 id="系统架构图"><a href="#系统架构图" class="headerlink" title="系统架构图"></a>系统架构图</h2><p><img src="https://img.alicdn.com/tfs/TB1cHdGRFXXXXapXpXXXXXXXXXX-741-661.png" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h2&gt;&lt;p&gt;Ateye系统是通用的应用运维平台，其具有应用程序行为控制和基于日志的系统监控两大类功能。使用方通过引入Ateye的client包并进行简单设置。&lt;/p&gt;
+&lt;h2 id=&quot;主要功能&quot;&gt;&lt;a href=&quot;#主要功能&quot; class=&quot;headerlink&quot; title=&quot;主要功能&quot;&gt;&lt;/a&gt;主要功能&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;方法调用（重点）&lt;/li&gt;
+&lt;li&gt;动态开关（重点）&lt;/li&gt;
+&lt;li&gt;日志级别调整&lt;/li&gt;
+&lt;li&gt;异常监控&lt;/li&gt;
+&lt;li&gt;KV埋点&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+      <category term="我在阿里学到的" scheme="http://yoursite.com/categories/%E6%88%91%E5%9C%A8%E9%98%BF%E9%87%8C%E5%AD%A6%E5%88%B0%E7%9A%84/"/>
+    
+    
+      <category term="Java" scheme="http://yoursite.com/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
     <title>【全栈之路】Node.js爬虫（一）</title>
     <link href="http://yoursite.com/2016/11/22/%E3%80%90%E5%85%A8%E6%A0%88%E4%B9%8B%E8%B7%AF%E3%80%91Node-js%E7%88%AC%E8%99%AB%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>http://yoursite.com/2016/11/22/【全栈之路】Node-js爬虫（一）/</id>
     <published>2016-11-21T18:01:08.000Z</published>
-    <updated>2016-11-21T19:05:54.000Z</updated>
+    <updated>2017-05-27T08:19:56.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="使用nodejs爬取知乎的内容，然后在web中显示出来"><a href="#使用nodejs爬取知乎的内容，然后在web中显示出来" class="headerlink" title="使用nodejs爬取知乎的内容，然后在web中显示出来"></a>使用nodejs爬取知乎的内容，然后在web中显示出来</h3><blockquote>
 <p><a href="https://www.zhihu.com/explore#daily-hot" target="_blank" rel="external">知乎发现URL</a></p>
@@ -127,7 +172,7 @@
     <link href="http://yoursite.com/2016/11/21/%E3%80%90%E5%85%A8%E6%A0%88%E4%B9%8B%E8%B7%AF%E3%80%91%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>http://yoursite.com/2016/11/21/【全栈之路】基础（一）/</id>
     <published>2016-11-20T17:24:21.000Z</published>
-    <updated>2016-11-21T18:50:43.000Z</updated>
+    <updated>2017-05-27T08:20:12.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="不懂就问，打好基础"><a href="#不懂就问，打好基础" class="headerlink" title="不懂就问，打好基础"></a>不懂就问，打好基础</h3><hr>
 <ol>
